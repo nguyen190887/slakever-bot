@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SlackAPI;
 using SlackeverBot.Models;
 using SlackeverBot.Services;
@@ -12,7 +11,7 @@ namespace SlakeverBot.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class SlackController: ControllerBase
+    public class SlackController : ControllerBase
     {
         private readonly IStorageService _storageService;
         private readonly IMapper _mapper;
@@ -33,9 +32,9 @@ namespace SlakeverBot.Controllers
         [Route("events")]
         public async Task<string> Events([FromBody]SlackMessage message)
         {
-            var loggedString = JsonConvert.SerializeObject(message);
+            //var loggedString = Newtonsoft.Json.JsonConvert.SerializeObject(message);
             //string requestString = await ReadRequestBody(Request.Body);
-            Console.WriteLine(loggedString);
+            //Console.WriteLine(loggedString);
 
             if (message.Type == EventType.UrlVerification)
             {
@@ -44,7 +43,6 @@ namespace SlakeverBot.Controllers
 
             if (message.Type == EventType.EventCallback && message.Event.Type == MessageType.Message)
             {
-                Console.WriteLine($"Received: {message.Event.Text}");
                 await _storageService.Add(_mapper.Map<StoredMessage>(message));
             }
 
@@ -62,21 +60,13 @@ namespace SlakeverBot.Controllers
             var response = await slackClient.PostMessageAsync("#general", msg);
         }
 
-        async Task<string> ReadRequestBody(Stream requestBody)
-        {
-            using (StreamReader reader = new StreamReader(requestBody))
-            {
-                return await reader.ReadToEndAsync();
-            }
-        }
+        //async Task<string> ReadRequestBody(Stream requestBody)
+        //{
+        //    using (StreamReader reader = new StreamReader(requestBody))
+        //    {
+        //        //requestBody.Seek(0, SeekOrigin.Begin);
+        //        return await reader.ReadToEndAsync();
+        //    }
+        //}
     }
-
-    /*
-     private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
-        }
-     */
 }

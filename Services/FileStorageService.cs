@@ -5,7 +5,7 @@ using SlackeverBot.Models;
 
 namespace SlackeverBot.Services
 {
-    public class FileStorageService: IStorageService
+    public class FileStorageService : IStorageService
     {
         private const string MessageFolder = "messages";
 
@@ -20,7 +20,7 @@ namespace SlackeverBot.Services
         public async Task Add(StoredMessage message)
         {
             // TODO: update message
-            await File.AppendAllTextAsync(GetFileName(message.Channel), $"{message.Text}{Environment.NewLine}");
+            await File.AppendAllTextAsync(GetFileName(message.Channel), $"{message.ToLogString()}{Environment.NewLine}");
         }
 
         private string GetFileName(string channelId)
