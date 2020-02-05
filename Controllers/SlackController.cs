@@ -23,6 +23,12 @@ namespace SlakeverBot.Controllers
             _storageService = storageService;
         }
 
+        [Route("home")]
+        public string Index()
+        {
+            return "Welcome to Slakever!";
+        }
+
         [HttpGet, HttpPost]
         [Route("events")]
         public async Task<string> Events([FromBody]SlackMessage message)
