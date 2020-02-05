@@ -1,11 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SlackAPI;
 using SlackeverBot.Models;
 using SlackeverBot.Services;
+using System.Threading.Tasks;
 
 namespace SlakeverBot.Controllers
 {
