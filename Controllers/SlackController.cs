@@ -1,9 +1,11 @@
-﻿using AutoMapper;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SlackAPI;
 using SlackeverBot.Models;
 using SlackeverBot.Services;
-using System.Threading.Tasks;
 
 namespace SlakeverBot.Controllers
 {
@@ -28,11 +30,11 @@ namespace SlakeverBot.Controllers
 
         [HttpGet, HttpPost]
         [Route("events")]
-        public async Task<string> Events([FromBody]SlackMessage message)
+        public async Task<string> Events(SlackMessage message)
+        //public async Task<string> Events()
         {
-            //var loggedString = Newtonsoft.Json.JsonConvert.SerializeObject(message);
             //string requestString = await ReadRequestBody(Request.Body);
-            //Console.WriteLine(loggedString);
+            //Console.WriteLine(requestString);
 
             if (message.Type == EventType.UrlVerification)
             {
@@ -58,13 +60,13 @@ namespace SlakeverBot.Controllers
             var response = await slackClient.PostMessageAsync("#general", msg);
         }
 
-        //async Task<string> ReadRequestBody(Stream requestBody)
-        //{
-        //    using (StreamReader reader = new StreamReader(requestBody))
-        //    {
-        //        //requestBody.Seek(0, SeekOrigin.Begin);
-        //        return await reader.ReadToEndAsync();
-        //    }
-        //}
+        async Task<string> ReadRequestBody(Stream requestBody)
+        {
+            using (StreamReader reader = new StreamReader(requestBody))
+            {
+                //requestBody.Seek(0, SeekOrigin.Begin);
+                return await reader.ReadToEndAsync();
+            }
+        }
     }
 }

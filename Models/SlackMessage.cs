@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace SlackeverBot.Models
@@ -19,44 +18,47 @@ namespace SlackeverBot.Models
     public class SlackMessage
     {
         public string Token { get; set; }
+
         public string Challenge { get; set; }
+
         public string Type { get; set; }
-        //[JsonProperty("team_id")]
-        public string Team_id { get; set; }
-        //[JsonPropertyName("team_id")]
-        public string TeamId => Team_id; // TODO: workaround
+
+        [JsonPropertyName("team_id")]
+        public string TeamId { get; set; }
 
         public MessageEvent Event { get; set; } = new MessageEvent();
-        //[JsonProperty("event_id")]
-        public string Event_id { get; set; }
-        //[JsonPropertyName("event_id")]
-        public string EventId => Event_id; // TODO: workaround
-        //[JsonProperty("event_time")]
-        public string Event_time { get; set; }
-        //[JsonPropertyName("event_time")]
-        public string EventTime => Event_time; // TODO: workaround
+
+        [JsonPropertyName("event_id")]
+        public string EventId { get; set; }
+
+        [JsonPropertyName("event_time")]
+        public long EventTime {get;set;}
     }
 
     public class MessageEvent
     {
-        //[JsonProperty("client_msg_id")]
-        public string Client_msg_id { get; set; }
-        //[JsonPropertyName("client_msg_id")]
-        public string MessageId => Client_msg_id; // TODO: workaround
+        [JsonPropertyName("client_msg_id")]
+        public string MessageId { get; set; }
+
         public string Type { get; set; }
+
         public string Text { get; set; }
+
         public string User { get; set; }
+
         public DateTime Timestamp { get; set; }
+
         public string Team { get; set; }
+
         public string Channel { get; set; }
-        public string Channel_type { get; set; }
-        //[JsonPropertyName("channel_type")]
-        public string ChannelType => Channel_type; // TODO: workaround
-        public string Event_ts { get; set; }
-        //[JsonPropertyName("event_ts")]
-        public string EventTimestamp => Event_ts; // TODO: workaround
-        public string Thread_ts { get; set; }
-        //[JsonPropertyName("thread_ts")]
-        public string ThreadTimestamp => Thread_ts; // TODO: workaround
+
+        [JsonPropertyName("channel_type")]
+        public string ChannelType { get; set; }
+
+        [JsonPropertyName("event_ts")]
+        public string EventTimestamp { get; set;  }
+
+        [JsonPropertyName("thread_ts")]
+        public string ThreadTimestamp { get; set; }
     }
 }
