@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SlackAPI;
@@ -31,11 +29,7 @@ namespace SlakeverBot.Controllers
         [HttpGet, HttpPost]
         [Route("events")]
         public async Task<string> Events(SlackMessage message)
-        //public async Task<string> Events()
         {
-            //string requestString = await ReadRequestBody(Request.Body);
-            //Console.WriteLine(requestString);
-
             if (message.Type == EventType.UrlVerification)
             {
                 return message.Challenge;
@@ -46,7 +40,6 @@ namespace SlakeverBot.Controllers
                 await _storageService.Add(_mapper.Map<StoredMessage>(message));
             }
 
-            //return new ContentResult { Content = requestString };
             return string.Empty;
         }
 
@@ -58,15 +51,6 @@ namespace SlakeverBot.Controllers
             var slackClient = new SlackTaskClient(TOKEN);
 
             var response = await slackClient.PostMessageAsync("#general", msg);
-        }
-
-        async Task<string> ReadRequestBody(Stream requestBody)
-        {
-            using (StreamReader reader = new StreamReader(requestBody))
-            {
-                //requestBody.Seek(0, SeekOrigin.Begin);
-                return await reader.ReadToEndAsync();
-            }
         }
     }
 }

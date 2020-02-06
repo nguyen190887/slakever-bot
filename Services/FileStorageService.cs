@@ -19,7 +19,6 @@ namespace SlackeverBot.Services
 
         public async Task Add(StoredMessage message)
         {
-            // TODO: update message
             await File.AppendAllTextAsync(GetFileName(message.Channel), $"{message.ToLogString()}{Environment.NewLine}");
         }
 

@@ -351,3 +351,4 @@ MigrationBackup/
 
 # Slack stuff
 messages/
+EmptyJSONFile.json
