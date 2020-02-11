@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace SlackeverBot.Models
+namespace SlakeverBot.Models
 {
     public static class MessageType
     {

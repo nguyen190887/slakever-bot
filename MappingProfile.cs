@@ -1,6 +1,6 @@
 ﻿using System;
 using AutoMapper;
-using SlackeverBot.Models;
+using SlakeverBot.Models;
 
 namespace SlakeverBot
 {

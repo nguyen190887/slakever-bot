@@ -2,8 +2,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SlackAPI;
-using SlackeverBot.Models;
-using SlackeverBot.Services;
+using SlakeverBot.Models;
+using SlakeverBot.Services;
 
 namespace SlakeverBot.Controllers
 {

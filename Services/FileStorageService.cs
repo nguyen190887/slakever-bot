@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using SlackeverBot.Models;
+using SlakeverBot.Models;
 
-namespace SlackeverBot.Services
+namespace SlakeverBot.Services
 {
     public class FileStorageService : IStorageService
     {
