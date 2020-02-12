@@ -1,5 +1,5 @@
 ﻿using System;
-namespace SlackeverBot.Models
+namespace SlakeverBot.Models
 {
     public class StoredMessage
     {

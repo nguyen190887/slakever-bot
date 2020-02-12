@@ -1,6 +1,6 @@
 ﻿using System;
 using AutoMapper;
-using SlackeverBot.Models;
+using SlakeverBot.Models;
 
 namespace SlakeverBot
 {
@@ -9,13 +9,20 @@ namespace SlakeverBot
         public MappingProfile()
         {
             CreateMap<SlackMessage, StoredMessage>()
-                .ForMember(s => s.Id, m => m.MapFrom(s => s.Event.MessageId))
-                .ForMember(s => s.Channel, m => m.MapFrom(s => s.Event.Channel))
-                .ForMember(s => s.From, m => m.MapFrom(s => s.Event.User))
-                .ForMember(s => s.Text, m => m.MapFrom(s => s.Event.Text))
-                .ForMember(s => s.Timestamp, m => m.MapFrom(s => new DateTime(s.EventTime)))
-                .ForMember(s => s.EventTimestamp, m => m.MapFrom(s => s.Event.EventTimestamp))
-                .ForMember(s => s.ThreadTimestamp, m => m.MapFrom(s => s.Event.ThreadTimestamp));
+                .ForMember(d => d.Id, m => m.MapFrom(s => s.Event.MessageId))
+                .ForMember(d => d.Channel, m => m.MapFrom(s => s.Event.Channel))
+                .ForMember(d => d.From, m => m.MapFrom(s => s.Event.User))
+                .ForMember(d => d.Text, m => m.MapFrom(s => s.Event.Text))
+                .ForMember(d => d.Timestamp, m => m.MapFrom(s => new DateTime(s.EventTime)))
+                .ForMember(d => d.EventTimestamp, m => m.MapFrom(s => s.Event.EventTimestamp))
+                .ForMember(d => d.ThreadTimestamp, m => m.MapFrom(s => s.Event.ThreadTimestamp));
+
+            CreateMap<SlackAPI.Channel, Channel>()
+                .ForMember(d => d.Description, m => m.MapFrom(s => s.purpose))
+                .ForMember(d => d.MemberIds, m => m.MapFrom(s => s.members))
+                .ForMember(d => d.Members, m => m.Ignore());
+
+            CreateMap<SlackAPI.User, User>();
         }
     }
 }

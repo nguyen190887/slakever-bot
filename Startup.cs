@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using SlackeverBot.Services;
+using SlakeverBot.Services;
 
 namespace slakever_bot
 {
@@ -37,7 +30,11 @@ namespace slakever_bot
 
             services.AddAutoMapper(GetType().Assembly);
 
-            services.AddTransient<IStorageService, FileStorageService>();
+            services
+                .AddTransient<IStorageService, FileStorageService>()
+                .AddTransient<IMessageQueryService, MessageQueryService>()
+                .AddTransient<ISlackService, SlackService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
