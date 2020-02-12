@@ -66,5 +66,10 @@ namespace SlakeverBot.Services
                 return Tuple.Create(0L, DateTime.MinValue);
             }));
         }
+
+        public Task<object> LoadArchivedMessages(DateTime archivedDate)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using SlackAPI;
 using SlakeverBot.Models;
 using SlakeverBot.Services;
 
@@ -15,19 +14,35 @@ namespace SlakeverBot.Controllers
     public class DataController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IMessageQueryService _messageQueryService;
+        private readonly IMessageQueryService _msgQueryService;
+        private readonly IMessageDeliveryService _msgDeliveryService;
 
-        public DataController(IMapper mapper, IMessageQueryService messageQueryService)
+        public DataController(IMapper mapper, IMessageQueryService msgQueryService, IMessageDeliveryService msgDeliveryService)
         {
             _mapper = mapper;
-            _messageQueryService = messageQueryService;
+            _msgQueryService = msgQueryService;
+            _msgDeliveryService = msgDeliveryService;
         }
 
         [Route("stats")]
         public async Task<IEnumerable<ChannelStatInfo>> Stats(string date = null)
         {
-            DateTime.TryParseExact(date, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedDate);
-            return await _messageQueryService.GetChannelMessageStats(parsedDate);
+            return await _msgQueryService.GetChannelMessageStats(ParseDateParam(date));
+        }
+
+        [Route("archive")]
+        [HttpPost]
+        public async Task Archive(string date)
+        {
+            var archivedDate = ParseDateParam(date);
+            var content = await _msgQueryService.LoadArchivedMessages(archivedDate);
+            await _msgDeliveryService.Deliver(content);
+        }
+
+        private DateTime ParseDateParam(string date)
+        {
+            DateTime.TryParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate);
+            return parsedDate;
         }
     }
 }
