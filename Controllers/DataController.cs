@@ -24,10 +24,10 @@ namespace SlakeverBot.Controllers
         }
 
         [Route("stats")]
-        public async Task<IEnumerable<ChannelStatInfo>> Stats()
+        public async Task<IEnumerable<ChannelStatInfo>> Stats(string date = null)
         {
-            var testDate = new DateTime(2020, 2, 5);
-            return await _messageQueryService.GetChannelMessageStats(testDate);
+            DateTime.TryParseExact(date, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime parsedDate);
+            return await _messageQueryService.GetChannelMessageStats(parsedDate);
         }
     }
 }
