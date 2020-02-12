@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using SlakeverBot.Models;
@@ -27,16 +28,7 @@ namespace SlakeverBot.Services
             {
                 stats.Add(new ChannelStatInfo { Channel = channel });
 
-                fileTasks.Add(Task.Run<Tuple<long, DateTime>>(() =>
-                {
-                    var filePath = Path.Combine("messages", $"{channel.Id}_{date.ToString("yyyyMMdd")}.txt");
-                    if (File.Exists(filePath))
-                    {
-                        var fileInfo = new FileInfo(filePath);
-                        return Tuple.Create(fileInfo.Length, fileInfo.LastWriteTimeUtc);
-                    }
-                    return Tuple.Create(0L, DateTime.MinValue);
-                }));
+                AllocateFileTasks(fileTasks, date, channel);
             }
 
             var taskResults = await Task.WhenAll(fileTasks);
@@ -46,7 +38,29 @@ namespace SlakeverBot.Services
                 stats[index].LastUpdated = taskResults[index].Item2;
             }
 
+            // Fetch user info
+            foreach (var s in stats)
+            {
+                s.Channel.Members = s.Channel.MemberIds
+                    .Select(id => _slackService.GetUserInfo(id).Result)
+                    .ToList();
+            }
+
             return stats;
+        }
+
+        private static void AllocateFileTasks(List<Task<Tuple<long, DateTime>>> fileTasks, DateTime date, Channel channel)
+        {
+            fileTasks.Add(Task.Run<Tuple<long, DateTime>>(() =>
+            {
+                var filePath = Path.Combine("messages", $"{channel.Id}_{date.ToString("yyyyMMdd")}.txt");
+                if (File.Exists(filePath))
+                {
+                    var fileInfo = new FileInfo(filePath);
+                    return Tuple.Create(fileInfo.Length, fileInfo.LastWriteTimeUtc);
+                }
+                return Tuple.Create(0L, DateTime.MinValue);
+            }));
         }
     }
 }

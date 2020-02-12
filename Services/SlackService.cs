@@ -57,7 +57,6 @@ namespace SlakeverBot.Services
 
         public async Task<User> GetUserInfo(string userId)
         {
-
             await EnsureUsersFetched();
 
             if (_cachedUsers.TryGetValue(userId, out SlackAPI.User user))

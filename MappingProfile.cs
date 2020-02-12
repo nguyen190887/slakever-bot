@@ -18,11 +18,11 @@ namespace SlakeverBot
                 .ForMember(d => d.ThreadTimestamp, m => m.MapFrom(s => s.Event.ThreadTimestamp));
 
             CreateMap<SlackAPI.Channel, Channel>()
-                .ForMember(d => d.Name, m => m.MapFrom(s => s.name))
-                .ForMember(d => d.Id, m => m.MapFrom(s => s.id))
                 .ForMember(d => d.Description, m => m.MapFrom(s => s.purpose))
                 .ForMember(d => d.MemberIds, m => m.MapFrom(s => s.members))
                 .ForMember(d => d.Members, m => m.Ignore());
+
+            CreateMap<SlackAPI.User, User>();
         }
     }
 }
