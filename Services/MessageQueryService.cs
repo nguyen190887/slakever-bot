@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using SlakeverBot.Models;
+using SlakeverBot.Constants;
 
 namespace SlakeverBot.Services
 {
@@ -20,7 +21,7 @@ namespace SlakeverBot.Services
         {
             var stats = new List<ChannelStatInfo>();
 
-            var channels = await _slackService.GetAllChannels();
+            var channels = await _slackService.GetAllChannels();  // TODO: exclude channels which do not contain bot
 
             var fileTasks = new List<Task<Tuple<long, DateTime>>>();
 
@@ -51,9 +52,12 @@ namespace SlakeverBot.Services
 
         private static void AllocateFileTasks(List<Task<Tuple<long, DateTime>>> fileTasks, DateTime date, Channel channel)
         {
+            Console.WriteLine($"Reading file from {FileConstants.MessageFolder} folder.");
+            System.Diagnostics.Debug.WriteLine($"Reading file from {FileConstants.MessageFolder} folder."); // TODO: just use 1 log
+
             fileTasks.Add(Task.Run<Tuple<long, DateTime>>(() =>
             {
-                var filePath = Path.Combine("messages", $"{channel.Id}_{date.ToString("yyyyMMdd")}.txt");
+                var filePath = Path.Combine(FileConstants.MessageFolder, $"{channel.Id}_{date.ToString("yyyyMMdd")}.txt");
                 if (File.Exists(filePath))
                 {
                     var fileInfo = new FileInfo(filePath);

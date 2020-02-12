@@ -1,19 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using SlakeverBot.Constants;
 using SlakeverBot.Models;
 
 namespace SlakeverBot.Services
 {
     public class FileStorageService : IStorageService
     {
-        private const string MessageFolder = "messages";
+        //private static readonly string MessageFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "messages");
 
         static FileStorageService()
         {
-            if (!Directory.Exists(MessageFolder))
+            Console.WriteLine("[INFO] Message folder: " + FileConstants.MessageFolder);
+            if (!Directory.Exists(FileConstants.MessageFolder))
             {
-                Directory.CreateDirectory(MessageFolder);
+                Directory.CreateDirectory(FileConstants.MessageFolder);
             }
         }
 
@@ -24,7 +26,7 @@ namespace SlakeverBot.Services
 
         private string GetFileName(string channelId)
         {
-            return Path.Combine(MessageFolder, $"{channelId}_{DateTime.UtcNow.ToString("yyyyMMdd")}.txt");
+            return Path.Combine(FileConstants.MessageFolder, $"{channelId}_{DateTime.UtcNow.ToString("yyyyMMdd")}.txt");
         }
     }
 }

@@ -57,11 +57,13 @@ namespace SlakeverBot.Services
 
         public async Task<User> GetUserInfo(string userId)
         {
-            await EnsureUsersFetched();
-
-            if (_cachedUsers.TryGetValue(userId, out SlackAPI.User user))
+            if (await EnsureUsersFetched())
             {
-                return _mapper.Map<User>(user);
+
+                if (_cachedUsers.TryGetValue(userId, out SlackAPI.User user))
+                {
+                    return _mapper.Map<User>(user);
+                }
             }
 
             return null;
@@ -93,11 +95,15 @@ namespace SlakeverBot.Services
             }
         }
 
-        private async Task EnsureUsersFetched()
+        private async Task<bool> EnsureUsersFetched()
         {
             if (!_cachedUsers.Any())
             {
                 var users = await _slackClient.GetUserListAsync();
+                if (users == null || users.members == null)
+                {
+                    return false;
+                }
 
                 lock (_userCacheLock)
                 {
@@ -107,6 +113,7 @@ namespace SlakeverBot.Services
                     }
                 }
             }
+            return true;
         }
 
         #endregion
