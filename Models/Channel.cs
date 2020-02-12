@@ -13,6 +13,8 @@ namespace SlakeverBot.Models
 
         public DateTime CreatedTime { get; set; }
 
+        public IEnumerable<string> MemberIds { get; set; }
+
         public IList<User> Members { get; set; }
 
         public IList<SlackMessage> PinnedMessages { get; set; }

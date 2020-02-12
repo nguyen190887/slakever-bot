@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -12,21 +14,20 @@ namespace SlakeverBot.Controllers
     [Route("[controller]")]
     public class DataController : ControllerBase
     {
-        private readonly IStorageService _storageService;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _configuration;
+        private readonly IMessageQueryService _messageQueryService;
 
-        public DataController(IMapper mapper, IStorageService storageService, IConfiguration configuration)
+        public DataController(IMapper mapper, IMessageQueryService messageQueryService)
         {
             _mapper = mapper;
-            _storageService = storageService;
-            _configuration = configuration;
+            _messageQueryService = messageQueryService;
         }
 
         [Route("stats")]
-        public string Stats()
+        public async Task<IEnumerable<ChannelStatInfo>> Stats()
         {
-            return "Welcome to Slakever!";
+            var testDate = new DateTime(2020, 2, 5);
+            return await _messageQueryService.GetChannelMessageStats(testDate);
         }
     }
 }

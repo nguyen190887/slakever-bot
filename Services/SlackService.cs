@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
@@ -10,37 +11,105 @@ namespace SlakeverBot.Services
     public class SlackService : ISlackService
     {
         // TODO: move to cache later
-        private static readonly Dictionary<string, SlackAPI.Channel> _cacheChannels = new Dictionary<string, SlackAPI.Channel>();
+        private static readonly Dictionary<string, SlackAPI.Channel> _cachedChannels = new Dictionary<string, SlackAPI.Channel>();
         private static readonly object _channelCacheLock = new object();
 
+        private static readonly Dictionary<string, SlackAPI.User> _cachedUsers = new Dictionary<string, SlackAPI.User>();
+        private static readonly object _userCacheLock = new object();
+
+        private const string SLACK_TOKEN = "SLACK_TOKEN";
+
         private readonly SlackAPI.SlackTaskClient _slackClient;
+        private readonly IConfiguration _configuration;
 
         private readonly IMapper _mapper;
 
         public SlackService(IConfiguration configuration, IMapper mapper)
         {
-            _slackClient = new SlackAPI.SlackTaskClient(configuration.GetValue<string>("SLACK_TOKEN"));
+            _configuration = configuration;
+            _slackClient = new SlackAPI.SlackTaskClient(GetSlackToken());
             _mapper = mapper;
+        }
+
+        public async Task<IEnumerable<Channel>> GetAllChannels()
+        {
+            await EnsureChannelsFetched();
+
+            var channels = new List<Channel>();
+            foreach (var channel in _cachedChannels.Values)
+            {
+                channels.Add(_mapper.Map<Channel>(channel));
+            }
+            return channels;
         }
 
         public async Task<Channel> GetChannelInfo(string channelId)
         {
-            if (_cacheChannels.TryGetValue(channelId, out SlackAPI.Channel channel))
+            await EnsureChannelsFetched();
+
+            if (_cachedChannels.TryGetValue(channelId, out SlackAPI.Channel channel))
             {
                 return _mapper.Map<Channel>(channel);
             }
 
-            var channels = await _slackClient.GetChannelListAsync();
-            //const string TOKEN = "TODO-TBD";
-            //var slackClient = new SlackTaskClient(TOKEN);
-
-            //var response = await slackClient.PostMessageAsync("#general", msg);
-            throw new NotImplementedException();
+            return null;
         }
 
-        public User GetUserInfo(string userId)
+        public async Task<User> GetUserInfo(string userId)
         {
-            throw new NotImplementedException();
+
+            await EnsureUsersFetched();
+
+            if (_cachedUsers.TryGetValue(userId, out SlackAPI.User user))
+            {
+                return _mapper.Map<User>(user);
+            }
+
+            return null;
         }
+
+
+
+        #region Utilities
+
+        private string GetSlackToken()
+        {
+            string envToken = Environment.GetEnvironmentVariable("SLACK_TOKEN");
+            return string.IsNullOrEmpty(envToken) ? _configuration.GetValue<string>("SLACK_TOKEN") : envToken;
+        }
+
+        private async Task EnsureChannelsFetched()
+        {
+            if (!_cachedChannels.Any())
+            {
+                var channels = await _slackClient.GetChannelListAsync();
+
+                lock (_channelCacheLock)
+                {
+                    foreach (var c in channels.channels)
+                    {
+                        _cachedChannels[c.id] = c;
+                    }
+                }
+            }
+        }
+
+        private async Task EnsureUsersFetched()
+        {
+            if (!_cachedUsers.Any())
+            {
+                var users = await _slackClient.GetUserListAsync();
+
+                lock (_userCacheLock)
+                {
+                    foreach (var u in users.members)
+                    {
+                        _cachedUsers[u.id] = u;
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }
