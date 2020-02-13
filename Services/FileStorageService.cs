@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using SlakeverBot.Constants;
 using SlakeverBot.Models;
+using SlakeverBot.Utils;
 
 namespace SlakeverBot.Services
 {
@@ -26,7 +27,7 @@ namespace SlakeverBot.Services
 
         private string GetFileName(string channelId)
         {
-            return Path.Combine(FileConstants.MessageFolder, $"{channelId}_{DateTime.UtcNow.ToString("yyyyMMdd")}.txt");
+            return Path.Combine(FileConstants.MessageFolder, $"{channelId}_{DateTime.UtcNow.ToFileString()}.txt");
         }
     }
 }

@@ -5,6 +5,8 @@ using System.IO;
 using System.Threading.Tasks;
 using SlakeverBot.Models;
 using SlakeverBot.Constants;
+using SlakeverBot.Utils;
+using System.Text.RegularExpressions;
 
 namespace SlakeverBot.Services
 {
@@ -57,7 +59,7 @@ namespace SlakeverBot.Services
 
             fileTasks.Add(Task.Run<Tuple<long, DateTime>>(() =>
             {
-                var filePath = Path.Combine(FileConstants.MessageFolder, $"{channel.Id}_{date.ToString("yyyyMMdd")}.txt");
+                var filePath = Path.Combine(FileConstants.MessageFolder, $"{channel.Id}_{date.ToFileString()}.txt");
                 if (File.Exists(filePath))
                 {
                     var fileInfo = new FileInfo(filePath);
@@ -67,9 +69,98 @@ namespace SlakeverBot.Services
             }));
         }
 
-        public Task<object> LoadArchivedMessages(DateTime archivedDate)
+        public async Task<DeliveredMessageCollection> LoadArchivedMessages(DateTime archivedDate)
         {
-            throw new NotImplementedException();
+            var searchPattern = $"*_{archivedDate.ToFileString()}.txt";
+            var filePaths = Directory.GetFiles(FileConstants.MessageFolder, searchPattern);
+
+            Dictionary<string, DeliveredMessage> parsedChannelMessageDict = new Dictionary<string, DeliveredMessage>();
+
+            foreach (var path in filePaths)
+            {
+                using (StreamReader reader = new StreamReader(File.OpenRead(path)))
+                {
+                    const string msgTimestampPattern = "[0-9]+\\.[0-9]{6}";
+                    var msgTsRegex = new Regex(msgTimestampPattern);
+
+                    string line;
+                    DeliveredMessage currentMsg = null;
+                    
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        var wordGroup = line.Split('\t');
+
+                        if (wordGroup.Length >= 3 && msgTsRegex.IsMatch(wordGroup[0]))
+                        {
+                            var rawTimestamp = wordGroup[0];
+                            currentMsg = new ChannelDeliveredMessage
+                            {
+                                Timestamp = ExtractTimeStamp(rawTimestamp),
+                                UserName = (await _slackService.GetUserInfo(wordGroup[1])).Name, // TODO: consider process separately
+                                Text = wordGroup[2]
+                            };
+
+                            parsedChannelMessageDict[rawTimestamp] = currentMsg;
+                        }
+                        // thread msg
+                        else if (msgTsRegex.IsMatch(wordGroup[wordGroup.Length - 1]))
+                        {
+                            if (wordGroup.Length == 4)
+                            {
+                                currentMsg = new ThreadDeliveredMessage
+                                {
+                                    Timestamp = ExtractTimeStamp(wordGroup[0]),
+                                    UserName = (await _slackService.GetUserInfo(wordGroup[1])).Name, // TODO: consider process separately
+                                    Text = wordGroup[2]
+                                };
+
+                                if (parsedChannelMessageDict.TryGetValue(wordGroup[3], out DeliveredMessage parentMsg))
+                                {
+                                    ((ThreadDeliveredMessage)currentMsg).ParentMessage = parentMsg;
+                                    ((ChannelDeliveredMessage)parentMsg).ChildMessages.Add(currentMsg);
+                                }
+                            }
+                            else if (wordGroup.Length == 2)
+                            {
+                                if (currentMsg != null)
+                                {
+                                    currentMsg = new ThreadDeliveredMessage(currentMsg);
+                                    currentMsg.Text += $"{Environment.NewLine}{wordGroup[0]}";
+
+                                    if (parsedChannelMessageDict.TryGetValue(wordGroup[1], out DeliveredMessage parentMsg))
+                                    {
+                                        ((ThreadDeliveredMessage)currentMsg).ParentMessage = parentMsg;
+                                        ((ChannelDeliveredMessage)parentMsg).ChildMessages.Add(currentMsg);
+                                    }
+                                }
+                            }
+                        }
+                        // text spans multi lines
+                        else
+                        {
+                            if (currentMsg != null)
+                            {
+                                currentMsg.Text += wordGroup[0];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return (DeliveredMessageCollection)parsedChannelMessageDict.Values.ToList();
+        }
+
+        private DateTime ExtractTimeStamp(string ts)
+        {
+            try
+            {
+                return new DateTime(long.Parse(ts.Split('.')[0]));
+            }
+            catch
+            {
+            }
+            return DateTime.MinValue;
         }
     }
 }

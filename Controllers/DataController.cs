@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SlakeverBot.Constants;
 using SlakeverBot.Models;
 using SlakeverBot.Services;
 
@@ -41,7 +42,7 @@ namespace SlakeverBot.Controllers
 
         private DateTime ParseDateParam(string date)
         {
-            DateTime.TryParseExact(date, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate);
+            DateTime.TryParseExact(date, AppConstants.FileDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate);
             return parsedDate;
         }
     }
