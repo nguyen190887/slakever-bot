@@ -69,15 +69,17 @@ namespace SlakeverBot.Services
             }));
         }
 
-        public async Task<DeliveredMessageCollection> LoadArchivedMessages(DateTime archivedDate)
+        public async Task<DeliveredMessageSet> LoadArchivedMessages(DateTime archivedDate)
         {
             var searchPattern = $"*_{archivedDate.ToFileString()}.txt";
             var filePaths = Directory.GetFiles(FileConstants.MessageFolder, searchPattern);
 
-            Dictionary<string, DeliveredMessage> parsedChannelMessageDict = new Dictionary<string, DeliveredMessage>();
+            var deliveredMessageSet = new DeliveredMessageSet();
 
             foreach (var path in filePaths)
             {
+                Dictionary<string, DeliveredMessage> parsedChannelMessageDict = new Dictionary<string, DeliveredMessage>();
+
                 using (StreamReader reader = new StreamReader(File.OpenRead(path)))
                 {
                     const string msgTimestampPattern = "[0-9]+\\.[0-9]{6}";
@@ -91,7 +93,7 @@ namespace SlakeverBot.Services
                     {
                         var wordGroup = line.Split('\t');
 
-                        if (wordGroup.Length >= 3 && msgTsRegex.IsMatch(wordGroup[0]))
+                        if (wordGroup.Length == 3 && msgTsRegex.IsMatch(wordGroup[0]))
                         {
                             var rawTimestamp = wordGroup[0];
                             currentMsg = new ChannelDeliveredMessage
@@ -141,14 +143,15 @@ namespace SlakeverBot.Services
                         {
                             if (currentMsg != null)
                             {
-                                currentMsg.Text += wordGroup[0];
+                                currentMsg.Text += $"{Environment.NewLine}{wordGroup[0]}";
                             }
                         }
                     }
                 }
+                deliveredMessageSet[Path.GetFileName(path)] = parsedChannelMessageDict.Values.ToList();
             }
 
-            return (DeliveredMessageCollection)parsedChannelMessageDict.Values.ToList();
+            return deliveredMessageSet;
         }
 
         private DateTime ExtractTimeStamp(string ts)

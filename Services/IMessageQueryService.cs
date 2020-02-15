@@ -8,6 +8,6 @@ namespace SlakeverBot.Services
     public interface IMessageQueryService
     {
         Task<IEnumerable<ChannelStatInfo>> GetChannelMessageStats(DateTime date);
-        Task<DeliveredMessageCollection> LoadArchivedMessages(DateTime archivedDate);
+        Task<DeliveredMessageSet> LoadArchivedMessages(DateTime archivedDate);
     }
 }

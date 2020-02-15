@@ -19,11 +19,16 @@ namespace SlakeverBot.Models
             UserName = copy.UserName;
             Text = copy.Text;
         }
+
+        public override string ToString()
+        {
+            return string.Join("  --  ", Timestamp.ToLongTimeString(), UserName, Text);
+        }
     }
 
     public class ChannelDeliveredMessage: DeliveredMessage
     {
-        public IList<DeliveredMessage> ChildMessages { get; set; }
+        public IList<DeliveredMessage> ChildMessages { get; set; } = new List<DeliveredMessage>();
 
         public ChannelDeliveredMessage() { }
 
@@ -39,7 +44,7 @@ namespace SlakeverBot.Models
         public ThreadDeliveredMessage(DeliveredMessage copy) : base(copy) { }
     }
 
-    public class DeliveredMessageCollection : List<DeliveredMessage>
+    public class DeliveredMessageSet: Dictionary<string, List<DeliveredMessage>>
     {
 
     }

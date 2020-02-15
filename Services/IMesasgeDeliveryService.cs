@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using SlakeverBot.Models;
 
 namespace SlakeverBot.Services
 {
     public interface IMessageDeliveryService
     {
-        Task Deliver(object content);
+        Task Deliver(DeliveredMessageSet content);
     }
 }
