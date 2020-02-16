@@ -5,6 +5,13 @@
     <RootNamespace>SlakeverBot</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="messages\**" />
+    <Content Remove="messages\**" />
+    <EmbeddedResource Remove="messages\**" />
+    <None Remove="messages\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />

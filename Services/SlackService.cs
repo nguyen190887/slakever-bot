@@ -17,8 +17,6 @@ namespace SlakeverBot.Services
         private static readonly Dictionary<string, SlackAPI.User> _cachedUsers = new Dictionary<string, SlackAPI.User>();
         private static readonly object _userCacheLock = new object();
 
-        private const string SLACK_TOKEN = "SLACK_TOKEN";
-
         private readonly SlackAPI.SlackTaskClient _slackClient;
         private readonly IConfiguration _configuration;
 
@@ -75,8 +73,15 @@ namespace SlakeverBot.Services
 
         private string GetSlackToken()
         {
-            string envToken = Environment.GetEnvironmentVariable("SLACK_TOKEN");
-            return string.IsNullOrEmpty(envToken) ? _configuration.GetValue<string>("SLACK_TOKEN") : envToken;
+            var envToken = Environment.GetEnvironmentVariable("SLACK_TOKEN");
+            var token = string.IsNullOrEmpty(envToken) ? _configuration.GetValue<string>("SlackToken") : envToken;
+
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new Exception("Slack Token is missing.");
+            }
+
+            return token;
         }
 
         private async Task EnsureChannelsFetched()
