@@ -137,10 +137,22 @@ namespace SlakeverBot.Services
                         }
                     }
                 }
-                deliveredMessageSet[Path.GetFileName(path)] = parsedChannelMessageDict.Values.ToList();
+
+                string logFile = Path.GetFileName(path);
+                deliveredMessageSet[logFile] = new ChannelMessageSet(parsedChannelMessageDict.Values)
+                {
+                    ChannelName = await GetChannelName(logFile)
+                };
+
             }
 
             return deliveredMessageSet;
+        }
+
+        private async Task<string> GetChannelName(string logFile)
+        {
+            var channelId = logFile.Split('_')[0];
+            return (await _slackService.GetChannelInfo(channelId))?.Name ?? channelId;
         }
 
         private DateTime ExtractTimeStamp(string ts)

@@ -22,7 +22,8 @@ namespace SlakeverBot
                 .ForMember(d => d.MemberIds, m => m.MapFrom(s => s.members))
                 .ForMember(d => d.Members, m => m.Ignore());
 
-            CreateMap<SlackAPI.User, User>();
+            CreateMap<SlackAPI.User, User>()
+                .ForMember(d => d.Email, m => m.MapFrom(s => s.profile.email));
         }
     }
 }

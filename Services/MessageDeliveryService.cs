@@ -8,17 +8,25 @@ namespace SlakeverBot.Services
 {
     public class MessageDeliveryService : IMessageDeliveryService
     {
-        public Task Deliver(DeliveredMessageSet msgSet)
+        public Task<string> Deliver(DeliveredMessageSet msgSet)
         {
+            var sb = new StringBuilder();
             foreach (string fileName in msgSet.Keys)
             {
-                LogResult(fileName, msgSet[fileName]);
+                var channelData = msgSet[fileName];
+                var log = BuildLog(fileName, channelData);
+
+                Console.WriteLine("** File: " + fileName);
+                Console.WriteLine(log);
+
+                sb.AppendLine($"######{Environment.NewLine}Channel: {channelData.ChannelName} - File: {fileName}{Environment.NewLine}{log}");
+                sb.AppendLine(Environment.NewLine);
             }
 
-            return Task.FromResult("");
+            return Task.FromResult(sb.ToString());
         }
 
-        private void LogResult(string fileName, IList<DeliveredMessage> messages)
+        private string BuildLog(string fileName, ChannelMessageSet messages)
         {
             var sb = new StringBuilder();
             var nestedIndent = new string(' ', 4);
@@ -33,8 +41,7 @@ namespace SlakeverBot.Services
                 }
             }
 
-            Console.WriteLine("** File: " + fileName);
-            Console.WriteLine(sb);
+            return sb.ToString();
         }
     }
 }

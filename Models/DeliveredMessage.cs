@@ -26,7 +26,7 @@ namespace SlakeverBot.Models
         }
     }
 
-    public class ChannelDeliveredMessage: DeliveredMessage
+    public class ChannelDeliveredMessage : DeliveredMessage
     {
         public IList<DeliveredMessage> ChildMessages { get; set; } = new List<DeliveredMessage>();
 
@@ -35,7 +35,7 @@ namespace SlakeverBot.Models
         public ChannelDeliveredMessage(DeliveredMessage copy) : base(copy) { }
     }
 
-    public class ThreadDeliveredMessage: DeliveredMessage
+    public class ThreadDeliveredMessage : DeliveredMessage
     {
         public DeliveredMessage ParentMessage { get; set; }
 
@@ -44,7 +44,16 @@ namespace SlakeverBot.Models
         public ThreadDeliveredMessage(DeliveredMessage copy) : base(copy) { }
     }
 
-    public class DeliveredMessageSet: Dictionary<string, List<DeliveredMessage>>
+    public class ChannelMessageSet : List<DeliveredMessage>
+    {
+        public string ChannelName { get; set; }
+
+        public ChannelMessageSet() : base() { }
+
+        public ChannelMessageSet(IEnumerable<DeliveredMessage> messages) : base(messages) { }
+    }
+
+    public class DeliveredMessageSet : Dictionary<string, ChannelMessageSet>
     {
 
     }

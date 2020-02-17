@@ -33,11 +33,11 @@ namespace SlakeverBot.Controllers
 
         [Route("archive")]
         [HttpPost]
-        public async Task Archive(string date)
+        public async Task<string> Archive(string date)
         {
             var archivedDate = ParseDateParam(date);
             var content = await _msgQueryService.LoadArchivedMessages(archivedDate);
-            await _msgDeliveryService.Deliver(content);
+            return await _msgDeliveryService.Deliver(content);
         }
 
         private DateTime ParseDateParam(string date)
