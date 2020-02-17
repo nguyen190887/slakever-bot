@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using SlakeverBot.Models;
@@ -11,24 +12,29 @@ namespace SlakeverBot.Services
         {
             foreach (string fileName in msgSet.Keys)
             {
-                var sb = new StringBuilder();
-                var nestedIndent = new string(' ', 4);
-
-                foreach (var msg in msgSet[fileName])
-                {
-                    sb.AppendLine(msg.ToString());
-
-                    foreach (var childMsg in ((ChannelDeliveredMessage)msg).ChildMessages)
-                    {
-                        sb.AppendLine($"{nestedIndent}{childMsg.ToString()}");
-                    }
-                }
-
-                Console.WriteLine("** File: " + fileName);
-                Console.WriteLine(sb);
+                LogResult(fileName, msgSet[fileName]);
             }
 
             return Task.FromResult("");
+        }
+
+        private void LogResult(string fileName, IList<DeliveredMessage> messages)
+        {
+            var sb = new StringBuilder();
+            var nestedIndent = new string(' ', 4);
+
+            foreach (var msg in messages)
+            {
+                sb.AppendLine(msg.ToString());
+
+                foreach (var childMsg in ((ChannelDeliveredMessage)msg).ChildMessages)
+                {
+                    sb.AppendLine($"{nestedIndent}{childMsg.ToString()}");
+                }
+            }
+
+            Console.WriteLine("** File: " + fileName);
+            Console.WriteLine(sb);
         }
     }
 }

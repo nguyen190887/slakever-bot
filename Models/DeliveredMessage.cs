@@ -22,7 +22,7 @@ namespace SlakeverBot.Models
 
         public override string ToString()
         {
-            return string.Join("  --  ", Timestamp.ToLongTimeString(), UserName, Text);
+            return string.Join("  --  ", Timestamp, UserName, Text);
         }
     }
 
