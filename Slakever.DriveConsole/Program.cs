@@ -11,7 +11,10 @@ namespace Slakever.DriveConsole
 {
     class Program
     {
-        static string[] Scopes = { DriveService.Scope.DriveReadonly };
+        static string[] Scopes = {
+            DriveService.Scope.DriveReadonly,
+            DriveService.Scope.DriveFile
+        };
 
         static async Task Main(string[] args)
         {
@@ -34,6 +37,32 @@ namespace Slakever.DriveConsole
                 ApplicationName = "SlakeverConsole"
             });
 
+            //ListFile(service);
+            const string uploadedFile = "GN6KNFX6V_20200212.txt";
+            await UploadFile(service, uploadedFile);
+        }
+
+        static async Task UploadFile(DriveService service, string filePath)
+        {
+            using (var toUploadStream = File.OpenRead(filePath))
+            {
+                var uploadProgress = await service.Files.Create(
+                    new Google.Apis.Drive.v3.Data.File
+                    {
+                        Name = Path.GetFileName(filePath),
+                    },
+                    toUploadStream,
+                    "text/plain").UploadAsync();
+                //TODO: not work yet
+
+                Console.WriteLine("BytesSent: " + uploadProgress.BytesSent);
+                Console.WriteLine("Status: " + uploadProgress.Status);
+                Console.WriteLine("Exception: " + uploadProgress.Exception.ToString());
+            }
+        }
+
+        private static void ListFile(DriveService service)
+        {
             var listRequest = service.Files.List();
             listRequest.PageSize = 10;
             listRequest.Fields = "nextPageToken, files(id, name)";
