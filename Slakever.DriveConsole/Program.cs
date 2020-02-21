@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,17 +40,20 @@ namespace Slakever.DriveConsole
 
             //ListFile(service);
             const string uploadedFile = "GN6KNFX6V_20200212.txt";
-            await UploadFile(service, uploadedFile);
+            var fileId = await UploadFile(service, uploadedFile);
+            await ShareFile(service, fileId);
         }
 
-        static async Task UploadFile(DriveService service, string filePath)
+        private static async Task<string> UploadFile(DriveService service, string filePath)
         {
+            const string testFolder = "1KvThWQp7JWJwFueUhL2osyNVhdGL9t2n";
             using (var toUploadStream = File.OpenRead(filePath))
             {
                 var mediaUpload = service.Files.Create(
                     new Google.Apis.Drive.v3.Data.File
                     {
                         Name = Path.GetFileName(filePath),
+                        Parents = new List<string> { testFolder }
                     },
                     toUploadStream,
                     "text/plain");
@@ -58,8 +62,24 @@ namespace Slakever.DriveConsole
 
                 Console.WriteLine("BytesSent: " + uploadProgress.BytesSent);
                 Console.WriteLine("Status: " + uploadProgress.Status);
-                Console.WriteLine("Exception: " + uploadProgress.Exception.ToString());
+                Console.WriteLine("Exception: " + uploadProgress.Exception?.ToString());
+
+                return mediaUpload.ResponseBody.Id;
             }
+        }
+
+        private static async Task ShareFile(DriveService service, string fileId)
+        {
+            var testEmail = ""; // TODO: set email for testing
+
+            var permissionCreateRequest = service.Permissions.Create(new Google.Apis.Drive.v3.Data.Permission
+            {
+                EmailAddress = testEmail,
+                Role = "reader",
+                Type = "user"
+            }, fileId);
+
+            var permission = await permissionCreateRequest.ExecuteAsync();
         }
 
         private static void ListFile(DriveService service)
