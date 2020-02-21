@@ -46,14 +46,15 @@ namespace Slakever.DriveConsole
         {
             using (var toUploadStream = File.OpenRead(filePath))
             {
-                var uploadProgress = await service.Files.Create(
+                var mediaUpload = service.Files.Create(
                     new Google.Apis.Drive.v3.Data.File
                     {
                         Name = Path.GetFileName(filePath),
                     },
                     toUploadStream,
-                    "text/plain").UploadAsync();
-                //TODO: not work yet
+                    "text/plain");
+
+                var uploadProgress = await mediaUpload.UploadAsync();
 
                 Console.WriteLine("BytesSent: " + uploadProgress.BytesSent);
                 Console.WriteLine("Status: " + uploadProgress.Status);
