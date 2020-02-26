@@ -57,7 +57,6 @@ namespace SlakeverBot.Services
         {
             if (await EnsureUsersFetched())
             {
-
                 if (_cachedUsers.TryGetValue(userId, out SlackAPI.User user))
                 {
                     return _mapper.Map<User>(user);
@@ -67,7 +66,18 @@ namespace SlakeverBot.Services
             return null;
         }
 
-
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            var users = new List<User>();
+            if (await EnsureUsersFetched())
+            {
+                foreach (var user in _cachedUsers.Values)
+                {
+                    users.Add(_mapper.Map<User>(user));
+                }
+            }
+            return users;
+        }
 
         #region Utilities
 
