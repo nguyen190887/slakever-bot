@@ -152,7 +152,7 @@ namespace SlakeverBot.Services
         private async Task<string> GetChannelName(string logFile)
         {
             var channelId = logFile.Split('_')[0];
-            return (await _slackService.GetChannelInfo(channelId))?.Name ?? channelId;
+            return (await _slackService.GetChannelInfo(channelId)).Name ?? channelId;
         }
 
         private DateTime ExtractTimeStamp(string ts)

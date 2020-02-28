@@ -34,7 +34,8 @@ namespace slakever_bot
                 .AddTransient<IStorageService, FileStorageService>()
                 .AddTransient<IMessageQueryService, MessageQueryService>()
                 .AddTransient<ISlackService, SlackService>()
-                .AddTransient<IMessageDeliveryService, MessageDeliveryService>();
+                .AddTransient<IMessageDeliveryService, MessageDeliveryService>()
+                .AddTransient<IFileSharingService, FileSharingService>();
 
         }
 

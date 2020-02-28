@@ -6,6 +6,6 @@ namespace SlakeverBot.Services
 {
     public interface IMessageDeliveryService
     {
-        Task<string> Deliver(DeliveredMessageSet content);
+        Task<string> Deliver(DeliveredMessageSet content, DeliveryType deliveryType = DeliveryType.Raw);
     }
 }

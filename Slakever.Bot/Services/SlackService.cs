@@ -50,7 +50,7 @@ namespace SlakeverBot.Services
                 return _mapper.Map<Channel>(channel);
             }
 
-            return null;
+            return new Channel();
         }
 
         public async Task<User> GetUserInfo(string userId)
@@ -63,7 +63,7 @@ namespace SlakeverBot.Services
                 }
             }
 
-            return null;
+            return new User();
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()

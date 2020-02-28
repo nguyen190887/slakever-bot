@@ -7,5 +7,7 @@ namespace SlakeverBot.Services
     public interface IStorageService
     {
         Task Add(StoredMessage message);
-    }    
+
+        Task SaveToFile(string filePath, string content);
+    }
 }
