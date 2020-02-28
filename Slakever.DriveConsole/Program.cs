@@ -46,14 +46,14 @@ namespace Slakever.DriveConsole
 
         private static async Task<string> UploadFile(DriveService service, string filePath)
         {
-            const string testFolder = "1KvThWQp7JWJwFueUhL2osyNVhdGL9t2n";
+            const string uploadFolder = "1tSd8ata8zq-ReTz7Pm1M6m1_5gR5AjcH";// for testing only
             using (var toUploadStream = File.OpenRead(filePath))
             {
                 var mediaUpload = service.Files.Create(
                     new Google.Apis.Drive.v3.Data.File
                     {
                         Name = Path.GetFileName(filePath),
-                        Parents = new List<string> { testFolder }
+                        Parents = new List<string> { uploadFolder }
                     },
                     toUploadStream,
                     "text/plain");
