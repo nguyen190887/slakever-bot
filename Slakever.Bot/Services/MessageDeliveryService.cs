@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SlakeverBot.Models;
+using SlakeverBot.Utils;
 
 namespace SlakeverBot.Services
 {
@@ -133,7 +134,7 @@ namespace SlakeverBot.Services
         {
             var chatLine = new TagBuilder("li");
             chatLine.InnerHtml.AppendHtml(
-                $"<i>{msg.Timestamp}</i>&nbsp;|&nbsp;<i class='user'>{msg.UserName}</i>: <span>{msg.Text}</span>");
+                $"<i>{msg.Timestamp.ToGmt7TimeZone()}</i>&nbsp;|&nbsp;<i class='user'>{msg.UserName}</i>: <span>{msg.Text}</span>");
             return chatLine;
         }
 

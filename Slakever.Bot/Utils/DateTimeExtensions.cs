@@ -13,6 +13,11 @@ namespace SlakeverBot.Utils
             return dt.ToString(AppConstants.FileDateFormat);
         }
 
+        public static DateTime ToGmt7TimeZone(this DateTime dt)
+        {
+            return dt.AddHours(7);
+        }
+
         public static DateTime FromUnixTime(this long unixTime)
         {
             return UnixEpoch.AddSeconds(unixTime);
