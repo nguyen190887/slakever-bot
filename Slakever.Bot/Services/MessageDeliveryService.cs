@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SlakeverBot.Models;
@@ -46,6 +47,8 @@ namespace SlakeverBot.Services
             return messages;
         }
 
+        #region Utilities
+
         private string BuildRawMessages(DeliveredMessageSet msgSet)
         {
             var sb = new StringBuilder();
@@ -74,7 +77,7 @@ namespace SlakeverBot.Services
                 var chatInfo = GenerateChatInfo(channelData.ChannelName, channelData.ChatDate);
                 await _storageService.SaveToFile(
                     Path.Combine("saved", $"{fileName}.html"),
-                    GenerateChatPageContent(chatInfo, BuildHtmlChat(fileName, channelData, chatInfo)));
+                    GenerateChatPageContent(chatInfo, await BuildHtmlChat(fileName, channelData, chatInfo)));
             }
         }
 
@@ -96,7 +99,7 @@ namespace SlakeverBot.Services
             return sb.ToString();
         }
 
-        private string BuildHtmlChat(string fileName, ChannelMessageSet messageSet, string chatInfo)
+        private async Task<string> BuildHtmlChat(string fileName, ChannelMessageSet messageSet, string chatInfo)
         {
             TagBuilder container = new TagBuilder("div");
             container.InnerHtml.AppendHtml(GenerateGlobalStyles());
@@ -104,7 +107,7 @@ namespace SlakeverBot.Services
 
             foreach (var message in messageSet)
             {
-                var chatLine = BuildHtmlChatLine(message);
+                var chatLine = await BuildHtmlChatLine(message);
 
                 var childMessages = ((ChannelDeliveredMessage)message).ChildMessages;
                 if (childMessages.Any())
@@ -114,7 +117,7 @@ namespace SlakeverBot.Services
 
                     foreach (var childMsg in childMessages)
                     {
-                        childMessageContainer.InnerHtml.AppendHtml(BuildHtmlChatLine(childMsg));
+                        childMessageContainer.InnerHtml.AppendHtml(await BuildHtmlChatLine(childMsg));
                     }
 
                     chatLine.InnerHtml.AppendHtml("<div class='arrow-up'></div>");
@@ -130,48 +133,49 @@ namespace SlakeverBot.Services
             return stringWriter.ToString();
         }
 
-        private TagBuilder BuildHtmlChatLine(DeliveredMessage msg)
+        private async Task<TagBuilder> BuildHtmlChatLine(DeliveredMessage msg)
         {
             var chatLine = new TagBuilder("li");
             chatLine.InnerHtml.AppendHtml(
-                $"<i>{msg.Timestamp.ToGmt7TimeZone()}</i>&nbsp;|&nbsp;<i class='user'>{msg.UserName}</i>: <span>{msg.Text}</span>");
+                @$"<i>{msg.Timestamp.ToGmt7TimeZone()}</i>&nbsp;|&nbsp;<i class='user'>{msg.UserName}</i>: 
+                   <span>{(await TranslateTexts(msg.Text))}</span>");
             return chatLine;
         }
 
         private string GenerateGlobalStyles()
         {
-            return @"
-<style>
-ul, li {
-  list-style: none;
-  margin: 5px;
-}
+            return 
+                @"<style>
+                ul, li {
+                    list-style: none;
+                    margin: 5px;
+                }
 
-.user {
-  font-weight: bolder;
-}
+                .user {
+                    font-weight: bolder;
+                }
 
-.child-messages {
-  background: #eee;
-  padding-left: 0;
-  margin-left: 10px;
-  margin-top: 0;
-}
+                .child-messages {
+                    background: #eee;
+                    padding-left: 0;
+                    margin-left: 10px;
+                    margin-top: 0;
+                }
 
-.child-messages li {
-  margin-top: 0;
-}
+                .child-messages li {
+                    margin-top: 0;
+                }
 
-.arrow-up {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 8px solid #eee;
-  margin-left: 15px;
-}
-</style>
-";
+                .arrow-up {
+                    width: 0;
+                    height: 0;
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-bottom: 8px solid #eee;
+                    margin-left: 15px;
+                }
+                </style>
+                ";
         }
 
         private string GenerateChatInfo(string channelName, DateTime chatDate)
@@ -185,10 +189,10 @@ ul, li {
                 @"<!DOCTYPE html>
                 <html lang=""en"">
                 <head>
-                  <meta http-equiv=""X-UA-Compatible"" content=""IE=edge"">
-                  <meta charset=""utf-8"">
-                  <meta name=""viewport"" content=""width=device-width"">
-                  <title>{0}</title>
+                    <meta http-equiv=""X-UA-Compatible"" content=""IE=edge"">
+                    <meta charset=""utf-8"">
+                    <meta name=""viewport"" content=""width=device-width"">
+                    <title>{0}</title>
                 </head>
                 <body>
                 {1}
@@ -198,5 +202,33 @@ ul, li {
 
             return string.Format(pageTemplate, chatInfo, htmlChat);
         }
+
+        private async Task<string> TranslateTexts(string msg)
+        {
+            // TODO: translate emoji
+            return await TranslateMentionTexts(msg);
+        }
+
+        private async Task<string> TranslateMentionTexts(string msg)
+        {
+            const string mentionPattern = "<@(U[A-Z0-9]+)>";
+            var matches = new Regex(mentionPattern).Matches(msg);
+            if (matches.Any())
+            {
+                var foundUsers = new Dictionary<string, string>();
+                foreach(Match match in matches)
+                {
+                    foundUsers[match.Value] = (await _slackService.GetUserInfo(match.Groups[1].Value)).Name;
+                }
+
+                foreach(var mentioned in foundUsers.Keys)
+                {
+                    msg = msg.Replace(mentioned, foundUsers[mentioned]);
+                }
+            }
+            return msg;
+        }
+
+        #endregion
     }
 }
