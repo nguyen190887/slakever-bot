@@ -70,9 +70,10 @@ namespace SlakeverBot.Services
                 var channelData = msgSet[fileName];
 
                 // for testing
+                var chatInfo = GenerateChatInfo(channelData.ChannelName, channelData.ChatDate);
                 await _storageService.SaveToFile(
                     Path.Combine("saved", $"{fileName}.html"),
-                    RenderChatPageContent(channelData.ChannelName, channelData.ChatDate, BuildHtmlChat(fileName, channelData)));
+                    GenerateChatPageContent(chatInfo, BuildHtmlChat(fileName, channelData, chatInfo)));
             }
         }
 
@@ -94,16 +95,17 @@ namespace SlakeverBot.Services
             return sb.ToString();
         }
 
-        private string BuildHtmlChat(string fileName, ChannelMessageSet messages)
+        private string BuildHtmlChat(string fileName, ChannelMessageSet messageSet, string chatInfo)
         {
             TagBuilder container = new TagBuilder("div");
             container.InnerHtml.AppendHtml(GenerateGlobalStyles());
+            container.InnerHtml.AppendHtml($"<h1>{chatInfo}</h1>");
 
-            foreach (var msg in messages)
+            foreach (var message in messageSet)
             {
-                var chatLine = BuildHtmlChatLine(msg);
+                var chatLine = BuildHtmlChatLine(message);
 
-                var childMessages = ((ChannelDeliveredMessage)msg).ChildMessages;
+                var childMessages = ((ChannelDeliveredMessage)message).ChildMessages;
                 if (childMessages.Any())
                 {
                     var childMessageContainer = new TagBuilder("ul");
@@ -171,7 +173,12 @@ ul, li {
 ";
         }
 
-        private string RenderChatPageContent(string channelName, DateTime chatDate, string htmlChat)
+        private string GenerateChatInfo(string channelName, DateTime chatDate)
+        {
+            return $"Channel: {channelName} | {chatDate.ToShortDateString()}";
+        }
+
+        private string GenerateChatPageContent(string chatInfo, string htmlChat)
         {
             const string pageTemplate =
                 @"<!DOCTYPE html>
@@ -180,15 +187,15 @@ ul, li {
                   <meta http-equiv=""X-UA-Compatible"" content=""IE=edge"">
                   <meta charset=""utf-8"">
                   <meta name=""viewport"" content=""width=device-width"">
-                  <title>Channel: {0} | {1}</title>
+                  <title>{0}</title>
                 </head>
                 <body>
-                {2}
+                {1}
                 </body>
                 </html>
                 ";
 
-            return string.Format(pageTemplate, channelName, chatDate.ToShortDateString(), htmlChat);
+            return string.Format(pageTemplate, chatInfo, htmlChat);
         }
     }
 }
