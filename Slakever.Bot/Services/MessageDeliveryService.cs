@@ -72,7 +72,7 @@ namespace SlakeverBot.Services
                 // for testing
                 await _storageService.SaveToFile(
                     Path.Combine("saved", $"{fileName}.html"),
-                    RenderChatPageContent(channelData.ChannelName, BuildHtmlChat(fileName, channelData)));
+                    RenderChatPageContent(channelData.ChannelName, channelData.ChatDate, BuildHtmlChat(fileName, channelData)));
             }
         }
 
@@ -96,7 +96,8 @@ namespace SlakeverBot.Services
 
         private string BuildHtmlChat(string fileName, ChannelMessageSet messages)
         {
-            TagBuilder tagBuilder = new TagBuilder("div");
+            TagBuilder container = new TagBuilder("div");
+            container.InnerHtml.AppendHtml(GenerateGlobalStyles());
 
             foreach (var msg in messages)
             {
@@ -113,19 +114,64 @@ namespace SlakeverBot.Services
                         childMessageContainer.InnerHtml.AppendHtml(BuildHtmlChatLine(childMsg));
                     }
 
+                    chatLine.InnerHtml.AppendHtml("<div class='arrow-up'></div>");
                     chatLine.InnerHtml.AppendHtml(childMessageContainer);
                 }
 
-                tagBuilder.InnerHtml.AppendHtml(chatLine);
+                container.InnerHtml.AppendHtml(chatLine);
             }
 
             var stringWriter = new StringWriter();
-            tagBuilder.WriteTo(stringWriter, System.Text.Encodings.Web.HtmlEncoder.Default);
+            container.WriteTo(stringWriter, System.Text.Encodings.Web.HtmlEncoder.Default);
 
             return stringWriter.ToString();
         }
 
-        private string RenderChatPageContent(string channelName, string htmlChat)
+        private TagBuilder BuildHtmlChatLine(DeliveredMessage msg)
+        {
+            var chatLine = new TagBuilder("li");
+            chatLine.InnerHtml.AppendHtml(
+                $"<i>{msg.Timestamp}</i>&nbsp;|&nbsp;<i class='user'>{msg.UserName}</i>: <span>{msg.Text}</span>");
+            return chatLine;
+        }
+
+        private string GenerateGlobalStyles()
+        {
+            return @"
+<style>
+ul, li {
+  list-style: none;
+  margin: 5px;
+}
+
+.user {
+  font-weight: bolder;
+}
+
+.child-messages {
+  background: #eee;
+  padding-left: 0;
+  margin-left: 10px;
+  margin-top: 0;
+}
+
+.child-messages li {
+  margin-top: 0;
+}
+
+.arrow-up {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #eee;
+  margin-left: 15px;
+}
+</style>
+";
+        }
+
+        private string RenderChatPageContent(string channelName, DateTime chatDate, string htmlChat)
         {
             const string pageTemplate =
                 @"<!DOCTYPE html>
@@ -134,23 +180,15 @@ namespace SlakeverBot.Services
                   <meta http-equiv=""X-UA-Compatible"" content=""IE=edge"">
                   <meta charset=""utf-8"">
                   <meta name=""viewport"" content=""width=device-width"">
-                  <title>{0}</title>
+                  <title>Channel: {0} | {1}</title>
                 </head>
                 <body>
-                {1}
+                {2}
                 </body>
                 </html>
                 ";
 
-            return string.Format(pageTemplate, channelName, htmlChat);
-        }
-
-        private TagBuilder BuildHtmlChatLine(DeliveredMessage msg)
-        {
-            var chatLine = new TagBuilder("li");
-            chatLine.InnerHtml.AppendHtml(
-                $"<i>{msg.Timestamp}</i> | <i>{msg.UserName}</i>: <span>{msg.Text}</span>");
-            return chatLine;
+            return string.Format(pageTemplate, channelName, chatDate.ToShortDateString(), htmlChat);
         }
     }
 }

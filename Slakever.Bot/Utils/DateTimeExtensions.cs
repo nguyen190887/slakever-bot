@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using SlakeverBot.Constants;
 
 namespace SlakeverBot.Utils
@@ -15,6 +16,12 @@ namespace SlakeverBot.Utils
         public static DateTime FromUnixTime(this long unixTime)
         {
             return UnixEpoch.AddSeconds(unixTime);
+        }
+
+        public static DateTime FromFileDate(this string s)
+        {
+            DateTime.TryParseExact(s, AppConstants.FileDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt);
+            return dt;
         }
     }
 }

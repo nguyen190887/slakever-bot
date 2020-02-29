@@ -48,6 +48,8 @@ namespace SlakeverBot.Models
     {
         public string ChannelName { get; set; }
 
+        public DateTime ChatDate { get; set; }
+
         public ChannelMessageSet() : base() { }
 
         public ChannelMessageSet(IEnumerable<DeliveredMessage> messages) : base(messages) { }
