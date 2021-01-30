@@ -12,5 +12,7 @@ namespace SlakeverBot.Services
         Task<Channel> GetChannelInfo(string channelId);
 
         Task<User> GetUserInfo(string userId);
+
+        Task<IEnumerable<User>> GetAllUsersAsync();
     }
 }

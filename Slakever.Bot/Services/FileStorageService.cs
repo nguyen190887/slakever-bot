@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using SlakeverBot.Constants;
 using SlakeverBot.Models;
+using SlakeverBot.Utils;
 
 namespace SlakeverBot.Services
 {
@@ -24,9 +25,14 @@ namespace SlakeverBot.Services
             await File.AppendAllTextAsync(GetFileName(message.Channel), $"{message.ToLogString()}{Environment.NewLine}");
         }
 
+        public async Task SaveToFile(string filePath, string content)
+        {
+            await File.WriteAllTextAsync(filePath, content);
+        }
+
         private string GetFileName(string channelId)
         {
-            return Path.Combine(FileConstants.MessageFolder, $"{channelId}_{DateTime.UtcNow.ToString("yyyyMMdd")}.txt");
+            return Path.Combine(FileConstants.MessageFolder, $"{channelId}_{DateTime.UtcNow.ToFileString()}.txt");
         }
     }
 }

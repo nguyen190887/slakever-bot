@@ -17,8 +17,6 @@ namespace SlakeverBot.Services
         private static readonly Dictionary<string, SlackAPI.User> _cachedUsers = new Dictionary<string, SlackAPI.User>();
         private static readonly object _userCacheLock = new object();
 
-        private const string SLACK_TOKEN = "SLACK_TOKEN";
-
         private readonly SlackAPI.SlackTaskClient _slackClient;
         private readonly IConfiguration _configuration;
 
@@ -52,31 +50,48 @@ namespace SlakeverBot.Services
                 return _mapper.Map<Channel>(channel);
             }
 
-            return null;
+            return new Channel();
         }
 
         public async Task<User> GetUserInfo(string userId)
         {
             if (await EnsureUsersFetched())
             {
-
                 if (_cachedUsers.TryGetValue(userId, out SlackAPI.User user))
                 {
                     return _mapper.Map<User>(user);
                 }
             }
 
-            return null;
+            return new User();
         }
 
-
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            var users = new List<User>();
+            if (await EnsureUsersFetched())
+            {
+                foreach (var user in _cachedUsers.Values)
+                {
+                    users.Add(_mapper.Map<User>(user));
+                }
+            }
+            return users;
+        }
 
         #region Utilities
 
         private string GetSlackToken()
         {
-            string envToken = Environment.GetEnvironmentVariable("SLACK_TOKEN");
-            return string.IsNullOrEmpty(envToken) ? _configuration.GetValue<string>("SLACK_TOKEN") : envToken;
+            var envToken = Environment.GetEnvironmentVariable("SLACK_TOKEN");
+            var token = string.IsNullOrEmpty(envToken) ? _configuration.GetValue<string>("SlackToken") : envToken;
+
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new Exception("Slack Token is missing.");
+            }
+
+            return token;
         }
 
         private async Task EnsureChannelsFetched()

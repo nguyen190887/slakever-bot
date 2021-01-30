@@ -350,5 +350,8 @@ MigrationBackup/
 .ionide/
 
 # Slack stuff
-messages/
 EmptyJSONFile.json
+appsettings.Development.json
+/Slakever.DriveConsole/credentials.json
+/Slakever.Bot/saved/
+/Slakever.Bot/messages/
